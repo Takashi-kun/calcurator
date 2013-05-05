@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>CY Calclater</title>
+    <link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+    <div id="result_area" class="base_width">0</div>
+    <div>
+        <div>
+            <button class="number" value="1">1</button>
+            <button class="number" value="2">2</button>
+            <button class="number" value="3">3</button>
+        </div>
+        <div>
+            <button class="number" value="4">4</button>
+            <button class="number" value="5">5</button>
+            <button class="number" value="6">6</button>
+        </div>
+        <div>
+            <button class="number" value="7">7</button>
+            <button class="number" value="8">8</button>
+            <button class="number" value="9">9</button>
+        </div>
+        <div>
+            <button class="number" value="0">0</button>
+            <button class="option" value="dot">.</button>
+            <button class="calc" value="clear">c</button>
+            <button class="calc" value="reset">ac</button>
+            <button class="calc" value="equal">=</button>
+        </div>
+        <div>
+            <button class="calc" value="plus">+</button>
+            <button class="calc" value="minus">-</button>
+            <button class="calc" value="times">*</button>
+            <button class="calc" value="div">/</button>
+        </div>
+    </div>
+    <script>
+    var resultScore  = 0;
+    var displayScore = 0;
+    var operator     = null;
+    var beforeNumber = false;
+    var isDotMode    = false;
+
+    var resultArea;
+    var buttonArray;
+
+    window.onload = function() {
+        resultArea   = document.querySelector('#result_area');
+        buttonArray = document.querySelectorAll('button');
+
+        for (var i = 0; i < buttonArray.length; i++) {
+            buttonArray[i].addEventListener('click', function(event) {
+                firedButtonClick(event.target);
+            }, false);
+        }
+    };
+
+    function firedButtonClick(target) {
+        var className = target.classList[0];
+        var targetValue = target.value;
+
+        if (className === 'number') {
+            if (beforeNumber === false) {
+                displayScore = 0;
+            }
+            //入力が数値
+            targetValue = Number(targetValue);
+
+            if (isDotMode === true) {
+                //小数点モードの時はdisplayScoreの小数点以下桁数を取得し, 小数変換
+                var str = new String(displayScore);
+                var digit = 1;
+                if (typeof str.split('.')[1] !== 'undefined') {
+                    digit = str.split('.')[1].length + 1;
+                }
+                displayScore = displayScore + targetValue * Math.pow(10, -Number(digit));
+            } else {
+                displayScore = displayScore * 10 + targetValue;
+            }
+            display(displayScore);
+            beforeNumber = true;
+        } else if (className === 'calc') {
+            //入力が演算子系
+            if (targetValue === 'clear') {
+                displayScore = 0;
+            } else if (targetValue === 'reset') {
+                displayScore = 0;
+                resultScore  = 0;
+                operator     = null;
+            } else {
+                calcuration(operator);
+                if (targetValue !== 'equal') {
+                    //operatorの場合
+                    operator = targetValue;
+                }
+            }
+            display(displayScore);
+
+            beforeNumber = false;
+            isDotMode = false;
+        } else if (className === 'option') {
+            isDotMode = true;
+        } else {
+            alert('Unknown error !!!');
+            beforeNumber = false;
+        }
+    }
+
+    function calcuration(operator) {
+        if (beforeNumber !== true) {
+            return;
+        }
+        switch(operator) {
+            case 'plus':
+                resultScore = resultScore + displayScore;
+                break;
+            case 'minus':
+                resultScore = resultScore - displayScore;
+                break;
+            case 'times':
+                resultScore = resultScore * displayScore;
+                break;
+            case 'div':
+                if (displayScore === 0) {
+                    alert('0で割るのはエラー');
+                    break;
+                }
+                resultScore = resultScore / displayScore;
+                break;
+            default:
+                resultScore = displayScore;
+                return;
+        }
+       displayScore = resultScore;
+    }
+
+    function display(score) {
+        resultArea.textContent = score;
+    }
+    </script>
+</body>
+</html>
+
